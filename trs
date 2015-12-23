@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+
+import requests
+import os
+
+API_ID = ""
+
+API_ID_FILE = "%s/.config/baidu-trs/token" % os.getenv("HOME")
+with open(API_ID_FILE) as fp:
+    line = fp.readline()
+    API_ID = line.split("\n")[0]
+
+def work(word, from_lang="auto", to_lang="auto"):
+    url = "http://openapi.baidu.com/public/2.0/bmt/translate"
+    p = {
+        "client_id": API_ID,
+        "q": word,
+        "from": from_lang,
+        "to": to_lang
+        }
+    r = requests.get(url, params=p)
+    data = r.json()
+    results = data.get("trans_result", [])
+    for item in results:
+        print("   %s" % item.get("dst"))
+
+# example
+#{'from': 'en', 'trans_result': [{'dst': '今天', 'src': 'today'}], 'to': 'zh'}
+
+if __name__ == "__main__":
+    if not API_ID:
+        print("API_ID not found in $HOME/.config/baidu-trs/token")
+        quit(1)
+    import sys
+    word = " ".join(sys.argv[1:])
+    work(word)
+
